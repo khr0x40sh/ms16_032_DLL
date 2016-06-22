@@ -1,11 +1,14 @@
+/* ms16-032.dll
+*  DLL port of MS16-032 Exploit PoC by James Forshaw.
+*  Modified by khr0x40sh
+*/
+
 #include <stdio.h>
 #include <tchar.h>
 #include <Windows.h>
 #include <map>
 
 #define MAX_PROCESSES 1000
-
-
 
 HANDLE GetThreadHandle()
 {
