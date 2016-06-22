@@ -98,7 +98,7 @@ DWORD CALLBACK SetTokenThread(LPVOID lpArg)
 	return 0;
 }
 
-BOOL APIENTRY DllMain(HANDLE hModule,
+BOOL WINAPI DllMain(HANDLE hModule,
 	DWORD  ul_reason_for_call,
 	LPVOID lpReserved)
 {
